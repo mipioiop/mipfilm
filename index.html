@@ -7,7 +7,7 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: black;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Arial Black', Gadget, sans-serif; /* Жирный шрифт */
         }
         video {
             position: absolute; top: 50%; left: 50%;
@@ -15,21 +15,23 @@
             min-width: 100%; min-height: 100%;
             z-index: 1;
         }
-        /* Слой для текста поверх видео */
         #overlay {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 50px; left: 0;
+            width: 100%; height: 80%;
             z-index: 10;
-            color: white; /* Цвет текста как на скриншоте */
-            font-size: 18px;
-            font-weight: bold;
-            padding: 20px;
-            box-sizing: border-box;
-            pointer-events: none; /* Чтобы клики проходили сквозь текст на видео */
-            text-shadow: 1px 1px 2px black;
+            color: #00FF00; /* Ярко-зеленый */
+            font-size: 40px; /* КРУПНЫЙ ТЕКСТ */
+            font-weight: 900;
             text-align: center;
+            text-shadow: 3px 3px 5px #000;
+            pointer-events: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+        .line { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -44,59 +46,50 @@
         const overlay = document.getElementById('overlay');
         const video = document.getElementById('jam-video');
 
-        async function getIPData() {
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                
-                // Формируем список строк как на оригинальном сайте
-                return [
-                    `IP Address: ${data.ip}`,
-                    `Country: ${data.country_name}`,
-                    `Region: ${data.region}`,
-                    `City: ${data.city}`,
-                    `Full Location: ${data.city}, ${data.region}, ${data.country_name}`,
-                    `Latitude: ${data.latitude}`,
-                    `Longitude: ${data.longitude}`,
-                    `Timezone: ${data.timezone}`,
-                    `Current Time: ${new Date().toLocaleString()}`,
-                    `ISP: ${data.org}`,
-                    `Organization: ${data.org}`,
-                    `Browser Name: ${navigator.appName}`,
-                    `Platform Name: ${navigator.platform}`,
-                    `Screen Width: ${window.screen.width}px`,
-                    `Screen Height: ${window.screen.height}px`,
-                    `GPU: Google Inc. (NVIDIA)`
-                ];
-            } catch (e) {
-                return ["Error loading data..."];
-            }
-        }
-
         async function startTrolling() {
-            const lines = await getIPData();
-            let currentLine = 0;
+            let ip = "87.121.124.112"; // Запасной IP
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                ip = data.ip;
+            } catch (e) { console.log("Using static IP"); }
 
-            // Запускаем "водопад" текста
+            const lines = [
+                `> PROTOCOL_INIT...`,
+                `> ACCESSING: ${ip}...`,
+                `> LAT: 43.2525 LONG: 76.9115`,
+                `> LOC: ALMATY, KAZAKHSTAN...`,
+                `> ISP: NLS KAZAKHSTAN LLC...`,
+                `> CPU: 12 THREADS...`,
+                `> GPU: NVIDIA GTX 1660 SUPER...`,
+                `> BROWSER: CHROME 148.0...`,
+                `> DATETIME: ${new Date().toLocaleString()}...`,
+                `> BREACH... BREACH... BREACH...`,
+                `>>> DATA STREAM ACTIVE`,
+                `> SECURING PARAMETERS...`
+            ];
+
+            let i = 0;
             const interval = setInterval(() => {
+                if (i >= lines.length) {
+                    i = 0; // Зацикливаем водопад
+                }
                 const div = document.createElement('div');
-                div.innerText = lines[currentLine % lines.length];
+                div.className = 'line';
+                div.innerText = lines[i];
                 overlay.appendChild(div);
                 
-                // Если текста слишком много, удаляем старые строки
-                if (overlay.childNodes.length > 25) {
+                // Удаляем лишние строки сверху, чтобы не забивать экран
+                if (overlay.childNodes.length > 15) {
                     overlay.removeChild(overlay.firstChild);
                 }
-                
-                currentLine++;
-            }, 100); // Скорость появления строк
+                i++;
+            }, 300); // Скорость появления (300мс — комфортно для чтения)
         }
 
-        // Запуск по первому клику
         document.body.addEventListener('click', function() {
             video.play();
-            
-            // Ждем 15 секунд перед тем как "спалить" данные
+            // Ждем ровно 15 секунд (15000 мс)
             setTimeout(startTrolling, 15000);
         }, { once: true });
     </script>
