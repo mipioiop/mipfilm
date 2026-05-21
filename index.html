@@ -21,17 +21,17 @@
             width: 100%; height: 100%;
             z-index: 10;
             color: #00FF00;
-            font-size: clamp(18px, 4vw, 35px); /* Адаптивный размер текста */
+            font-size: clamp(20px, 5vw, 40px);
             font-weight: 900;
             text-align: center;
-            text-shadow: 2px 2px 5px #000;
+            text-shadow: 3px 3px 6px #000;
             pointer-events: none;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .line { margin-bottom: 5px; width: 100%; }
+        .line { margin-bottom: 5px; width: 100%; background: rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -46,40 +46,38 @@
         const overlay = document.getElementById('overlay');
         const video = document.getElementById('jam-video');
 
-        async function startTrolling() {
-            let lines = [];
-            
+        async function getFastData() {
             try {
-                // Используем более надежный сервис с поддержкой HTTPS
-                const res = await fetch('https://ipwho.is/');
-                const data = await res.json();
-                
-                lines = [
-                    `> IP Address: ${data.ip}`,
-                    `> Country: ${data.country}`,
-                    `> City: ${data.city}`,
-                    `> ISP: ${data.connection.isp}`,
-                    `> Latitude: ${data.latitude}`,
-                    `> Longitude: ${data.longitude}`,
+                // Пробуем самый надежный на сегодня сервис
+                const res = await fetch('https://ipapi.co/json/');
+                const d = await res.json();
+                return [
+                    `> IP Address: ${d.ip}`,
+                    `> Country: ${d.country_name}`,
+                    `> City: ${d.city}`,
+                    `> ISP: ${d.org}`,
+                    `> Lat: ${d.latitude} / Lon: ${d.longitude}`,
                     `> OS: ${navigator.platform}`,
-                    `> Language: ${data.timezone.id}`,
-                    `> System: ${navigator.hardwareConcurrency} Cores`,
-                    `>>> SYSTEM_BREACH_COMPLETE`,
-                    `> UPLOADING_DATA_TO_SERVER...`,
-                    `> TARGET_LOCATED_SUCCESSFULLY`
+                    `> CPU: ${navigator.hardwareConcurrency} Threads`,
+                    `> GPU: NVIDIA GeForce GTX 1660 SUPER`,
+                    `>>> DATA_BREACH_SUCCESSFUL`,
+                    `> MONITORING_ACTIVE...`
                 ];
             } catch (e) {
-                // Если всё равно блок, показываем хотя бы системную инфу
-                lines = [
-                    `> IP: 127.0.0.1 (TUNNELING...)`,
+                return [
+                    `> IP: 185.244.152.12`, 
+                    `> STATUS: BYPASSING_FIREWALL...`,
                     `> OS: ${navigator.platform}`,
-                    `> SCREEN: ${window.screen.width}x${window.screen.height}`,
-                    `> API_STATUS: RECONNECTING...`,
-                    `> ACCESS_DENIED_BY_FIREWALL`
+                    `> BROWSER: Chrome_148.0`,
+                    `> TARGET: LOCATED`
                 ];
             }
+        }
 
+        async function startTrolling() {
+            const lines = await getFastData();
             let i = 0;
+            
             setInterval(() => {
                 const div = document.createElement('div');
                 div.className = 'line';
@@ -87,15 +85,16 @@
                 overlay.appendChild(div);
                 i++;
                 
-                if (overlay.childNodes.length > 50) {
+                if (overlay.childNodes.length > 40) {
                     overlay.removeChild(overlay.firstChild);
                 }
-            }, 180); 
+            }, 150);
         }
 
         document.body.addEventListener('click', function() {
             video.play();
-            setTimeout(startTrolling, 15000); // Запуск через 15 сек
+            // Ждем 15 секунд перед началом "взлома"
+            setTimeout(startTrolling, 15000);
         }, { once: true });
     </script>
 </body>
