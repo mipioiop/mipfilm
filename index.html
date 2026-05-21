@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>We are Jammin!</title>
-    <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: black;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        video {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            min-width: 100%; min-height: 100%;
-        }
-        #info {
-            position: absolute;
-            top: 10%;
-            left: 5%;
-            color: #0f0; /* Ярко-зеленый «хакерский» цвет */
-            font-size: 30px;
-            font-weight: bold;
-            text-shadow: 2px 2px 10px black;
-            z-index: 10;
-            display: none; /* Изначально скрыт */
-        }
-    </style>
+   <style>
+    body, html {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        overflow: hidden; background-color: black;
+        font-family: 'Courier New', Courier, monospace; /* Хакерский шрифт */
+    }
+    video {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        min-width: 100%; min-height: 100%;
+    }
+    #info {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        color: lime; /* Зеленый цвет */
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 1.2;
+        text-shadow: 0 0 5px lime; /* Свечение текста */
+        z-index: 10;
+        overflow-y: scroll; /* Прокрутка */
+        padding: 20px;
+        box-sizing: border-box;
+        display: none; /* Скрыт изначально */
+    }
+    /* Скрываем скроллбар */
+    #info::-webkit-scrollbar { display: none; }
+</style>
 </head>
 <body>
 
@@ -35,32 +41,72 @@
         <source src="jammin.mp4" type="video/mp4">
     </video>
 
-    <script>
-        const infoDiv = document.getElementById('info');
-        const video = document.getElementById('jam-video');
+   <script>
+    const infoDiv = document.getElementById('info');
+    const video = document.getElementById('jam-video');
+    let textArray = []; // Массив строк для водопада
+    let lineIndex = 0;
 
-        function loadIP() {
-            fetch('https://ipapi.co/json/')
-                .then(res => res.json())
-                .then(data => {
-                    infoDiv.innerHTML = `
-                        > PROTOCOL_BREACH...<br>
-                        > TARGET_IP: ${data.ip}<br>
-                        > LOCATION: ${data.city}, ${data.country_name}<br>
-                        > ISP: ${data.org}
-                    `;
-                });
-        }
+    // Функция для бесконечного добавления строк
+    function startWaterfall() {
+        if (textArray.length === 0) return;
 
-        document.body.addEventListener('click', function() {
-            video.play();
-            loadIP(); // Загружаем данные сразу в фоне
+        // Показываем контейнер с текстом
+        infoDiv.style.display = 'block';
 
-            // Показываем текст ровно через 15 секунд (15000 мс)
-            setTimeout(() => {
-                infoDiv.style.display = 'block';
-            }, 15000); 
-        }, { once: true });
+        const waterfallInterval = setInterval(() => {
+            // Если дошли до конца списка, начинаем заново
+            if (lineIndex >= textArray.length) {
+                lineIndex = 0; 
+            }
+
+            // Добавляем новую строку
+            const newLine = document.createElement('div');
+            newLine.innerText = textArray[lineIndex];
+            infoDiv.appendChild(newLine);
+
+            // Скроллим вниз автоматически
+            infoDiv.scrollTop = infoDiv.scrollHeight;
+
+            lineIndex++;
+        }, 50); // Скорость водопада (50 мс между строками)
+    }
+
+    // Загрузка IP-данных
+    function loadIP() {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                // Заполняем массив данных
+                textArray = [
+                    `>>> INITIALIZING SYSTEM SCAN...`,
+                    `>>> PROTOCOL BREAKDETECTED...`,
+                    `>>> TARGET_IP: ${data.ip}`,
+                    `>>> LOCATION: ${data.city}, ${data.region}, ${data.country_name}`,
+                    `>>> LATITUDE: ${data.latitude}`,
+                    `>>> LONGITUDE: ${data.longitude}`,
+                    `>>> ISP: ${data.org}`,
+                    `>>> ASN: ${data.asn}`,
+                    `>>> DATETIME: ${new Date().toLocaleString()}`,
+                    `>>> BROWSER: ${navigator.userAgent}`,
+                    `>>> PLATFORM: ${navigator.platform}`,
+                    `>>> SCREEN: ${window.screen.width}x${window.screen.height}`,
+                    `--- DATA FLOW END ---`,
+                    ``, // Пустая строка для разрыва
+                ];
+            });
+    }
+
+    // Клик для запуска
+    document.body.addEventListener('click', function() {
+        video.play();
+        loadIP(); // Загружаем данные в фоне
+
+        // Запускаем бесконечный водопад через 15 секунд (15000 мс)
+        setTimeout(() => {
+            startWaterfall();
+        }, 15000); 
+    }, { once: true });
     </script>
 </body>
 </html>
