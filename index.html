@@ -3,110 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <title>We are Jammin!</title>
-   <style>
-    body, html {
-        margin: 0; padding: 0; width: 100%; height: 100%;
-        overflow: hidden; background-color: black;
-        font-family: 'Courier New', Courier, monospace; /* Хакерский шрифт */
-    }
-    video {
-        position: absolute; top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        min-width: 100%; min-height: 100%;
-    }
-    #info {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        color: lime; /* Зеленый цвет */
-        font-size: 16px;
-        font-weight: bold;
-        line-height: 1.2;
-        text-shadow: 0 0 5px lime; /* Свечение текста */
-        z-index: 10;
-        overflow-y: scroll; /* Прокрутка */
-        padding: 20px;
-        box-sizing: border-box;
-        display: none; /* Скрыт изначально */
-    }
-    /* Скрываем скроллбар */
-    #info::-webkit-scrollbar { display: none; }
-</style>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: black;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        video {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%; min-height: 100%;
+            z-index: 1;
+        }
+        /* Слой для текста поверх видео */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            color: white; /* Цвет текста как на скриншоте */
+            font-size: 18px;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none; /* Чтобы клики проходили сквозь текст на видео */
+            text-shadow: 1px 1px 2px black;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="info"></div>
+    <div id="overlay"></div>
 
     <video id="jam-video" loop playsinline>
         <source src="jammin.mp4" type="video/mp4">
     </video>
 
-   <script>
-    const infoDiv = document.getElementById('info');
-    const video = document.getElementById('jam-video');
-    let textArray = []; // Массив строк для водопада
-    let lineIndex = 0;
+    <script>
+        const overlay = document.getElementById('overlay');
+        const video = document.getElementById('jam-video');
 
-    // Функция для бесконечного добавления строк
-    function startWaterfall() {
-        if (textArray.length === 0) return;
-
-        // Показываем контейнер с текстом
-        infoDiv.style.display = 'block';
-
-        const waterfallInterval = setInterval(() => {
-            // Если дошли до конца списка, начинаем заново
-            if (lineIndex >= textArray.length) {
-                lineIndex = 0; 
-            }
-
-            // Добавляем новую строку
-            const newLine = document.createElement('div');
-            newLine.innerText = textArray[lineIndex];
-            infoDiv.appendChild(newLine);
-
-            // Скроллим вниз автоматически
-            infoDiv.scrollTop = infoDiv.scrollHeight;
-
-            lineIndex++;
-        }, 50); // Скорость водопада (50 мс между строками)
-    }
-
-    // Загрузка IP-данных
-    function loadIP() {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                // Заполняем массив данных
-                textArray = [
-                    `>>> INITIALIZING SYSTEM SCAN...`,
-                    `>>> PROTOCOL BREAKDETECTED...`,
-                    `>>> TARGET_IP: ${data.ip}`,
-                    `>>> LOCATION: ${data.city}, ${data.region}, ${data.country_name}`,
-                    `>>> LATITUDE: ${data.latitude}`,
-                    `>>> LONGITUDE: ${data.longitude}`,
-                    `>>> ISP: ${data.org}`,
-                    `>>> ASN: ${data.asn}`,
-                    `>>> DATETIME: ${new Date().toLocaleString()}`,
-                    `>>> BROWSER: ${navigator.userAgent}`,
-                    `>>> PLATFORM: ${navigator.platform}`,
-                    `>>> SCREEN: ${window.screen.width}x${window.screen.height}`,
-                    `--- DATA FLOW END ---`,
-                    ``, // Пустая строка для разрыва
+        async function getIPData() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                // Формируем список строк как на оригинальном сайте
+                return [
+                    `IP Address: ${data.ip}`,
+                    `Country: ${data.country_name}`,
+                    `Region: ${data.region}`,
+                    `City: ${data.city}`,
+                    `Full Location: ${data.city}, ${data.region}, ${data.country_name}`,
+                    `Latitude: ${data.latitude}`,
+                    `Longitude: ${data.longitude}`,
+                    `Timezone: ${data.timezone}`,
+                    `Current Time: ${new Date().toLocaleString()}`,
+                    `ISP: ${data.org}`,
+                    `Organization: ${data.org}`,
+                    `Browser Name: ${navigator.appName}`,
+                    `Platform Name: ${navigator.platform}`,
+                    `Screen Width: ${window.screen.width}px`,
+                    `Screen Height: ${window.screen.height}px`,
+                    `GPU: Google Inc. (NVIDIA)`
                 ];
-            });
-    }
+            } catch (e) {
+                return ["Error loading data..."];
+            }
+        }
 
-    // Клик для запуска
-    document.body.addEventListener('click', function() {
-        video.play();
-        loadIP(); // Загружаем данные в фоне
+        async function startTrolling() {
+            const lines = await getIPData();
+            let currentLine = 0;
 
-        // Запускаем бесконечный водопад через 15 секунд (15000 мс)
-        setTimeout(() => {
-            startWaterfall();
-        }, 15000); 
-    }, { once: true });
+            // Запускаем "водопад" текста
+            const interval = setInterval(() => {
+                const div = document.createElement('div');
+                div.innerText = lines[currentLine % lines.length];
+                overlay.appendChild(div);
+                
+                // Если текста слишком много, удаляем старые строки
+                if (overlay.childNodes.length > 25) {
+                    overlay.removeChild(overlay.firstChild);
+                }
+                
+                currentLine++;
+            }, 100); // Скорость появления строк
+        }
+
+        // Запуск по первому клику
+        document.body.addEventListener('click', function() {
+            video.play();
+            
+            // Ждем 15 секунд перед тем как "спалить" данные
+            setTimeout(startTrolling, 15000);
+        }, { once: true });
     </script>
 </body>
 </html>
