@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>We are Jammin!</title>
+    <style>
+        /* Делаем видео на весь экран */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+        }
+        video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="jam-video" loop playsinline>
+        <source src="jammin.mp4" type="video/mp4">
+    </video>
+
+    <script>
+        // Современные браузеры запрещают автоплей со звуком без клика
+        document.body.addEventListener('click', function() {
+            const video = document.getElementById('jam-video');
+            video.play();
+        }, { once: true });
+    </script>
+</body>
+</html>
