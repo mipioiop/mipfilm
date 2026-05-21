@@ -7,7 +7,7 @@
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: black;
-            font-family: 'Arial Black', Gadget, sans-serif; /* Жирный шрифт */
+            font-family: 'Arial Black', Gadget, sans-serif;
         }
         video {
             position: absolute; top: 50%; left: 50%;
@@ -20,8 +20,8 @@
             top: 50px; left: 0;
             width: 100%; height: 80%;
             z-index: 10;
-            color: #00FF00; /* Ярко-зеленый */
-            font-size: 40px; /* КРУПНЫЙ ТЕКСТ */
+            color: #00FF00;
+            font-size: 40px; 
             font-weight: 900;
             text-align: center;
             text-shadow: 3px 3px 5px #000;
@@ -47,49 +47,48 @@
         const video = document.getElementById('jam-video');
 
         async function startTrolling() {
-            let ip = "87.121.124.112"; // Запасной IP
+            let lines = ["Loading data..."];
+            
             try {
-                const res = await fetch('https://api.ipify.org?format=json');
+                // Запрашиваем реальные данные посетителя
+                const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
-                ip = data.ip;
-            } catch (e) { console.log("Using static IP"); }
-
-            const lines = [
-                `> PROTOCOL_INIT...`,
-                `> ACCESSING: ${ip}...`,
-                `> LAT: 43.2525 LONG: 76.9115`,
-                `> LOC: ALMATY, KAZAKHSTAN...`,
-                `> ISP: NLS KAZAKHSTAN LLC...`,
-                `> CPU: 12 THREADS...`,
-                `> GPU: NVIDIA GTX 1660 SUPER...`,
-                `> BROWSER: CHROME 148.0...`,
-                `> DATETIME: ${new Date().toLocaleString()}...`,
-                `> BREACH... BREACH... BREACH...`,
-                `>>> DATA STREAM ACTIVE`,
-                `> SECURING PARAMETERS...`
-            ];
+                
+                // Формируем список из РЕАЛЬНЫХ данных
+                lines = [
+                    `> IP Address: ${data.ip}`,
+                    `> Country: ${data.country_name}`,
+                    `> City: ${data.city}`,
+                    `> ISP: ${data.org}`,
+                    `> Latitude: ${data.latitude}`,
+                    `> Longitude: ${data.longitude}`,
+                    `> OS: ${navigator.platform}`,
+                    `> BROWSER: ${navigator.userAgent.split(' ')[0]}`,
+                    `>>> DATA STREAM ACTIVE`,
+                    `> ACCESS GRANTED...`,
+                    `> BREACH DETECTED!`
+                ];
+            } catch (e) {
+                lines = ["> Error: Connection reset", "> Target hidden"];
+            }
 
             let i = 0;
             const interval = setInterval(() => {
-                if (i >= lines.length) {
-                    i = 0; // Зацикливаем водопад
-                }
                 const div = document.createElement('div');
                 div.className = 'line';
-                div.innerText = lines[i];
+                div.innerText = lines[i % lines.length];
                 overlay.appendChild(div);
                 
-                // Удаляем лишние строки сверху, чтобы не забивать экран
                 if (overlay.childNodes.length > 15) {
                     overlay.removeChild(overlay.firstChild);
                 }
                 i++;
-            }, 300); // Скорость появления (300мс — комфортно для чтения)
+            }, 300);
         }
 
         document.body.addEventListener('click', function() {
             video.play();
-            // Ждем ровно 15 секунд (15000 мс)
+            // Появление через 15 секунд
             setTimeout(startTrolling, 15000);
         }, { once: true });
     </script>
