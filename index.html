@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>SUPER PUPER VIDEO</title>
+    <title>We are Jammin!</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: black;
-            font-family: 'Arial Black', Gadget, sans-serif;
+            font-family: 'Arial Black', sans-serif;
         }
         video {
             position: absolute; top: 50%; left: 50%;
@@ -21,10 +21,10 @@
             width: 100%; height: 100%;
             z-index: 10;
             color: #00FF00;
-            font-size: 32px; 
+            font-size: 35px; /* Большой размер */
             font-weight: 900;
             text-align: center;
-            text-shadow: 2px 2px 5px #000;
+            text-shadow: 3px 3px 6px #000;
             pointer-events: none;
             overflow: hidden;
             display: flex;
@@ -47,47 +47,53 @@
         const video = document.getElementById('jam-video');
 
         async function startTrolling() {
-            let realIP = "LOADING...";
+            let lines = [];
             
             try {
-                // Самый надежный способ получить ТОЛЬКО твой IP
-                const res = await fetch('https://api.ipify.org?format=json');
+                // Тянем данные через сервис, который использует оригинал
+                const res = await fetch('http://ip-api.com/json/?fields=66842623');
                 const data = await res.json();
-                realIP = data.ip;
+                
+                lines = [
+                    `> IP Address: ${data.query}`,
+                    `> Country: ${data.country}`,
+                    `> Region: ${data.regionName}`,
+                    `> City: ${data.city}`,
+                    `> ZIP Code: ${data.zip}`,
+                    `> ISP: ${data.isp}`,
+                    `> Organization: ${data.org}`,
+                    `> Latitude: ${data.lat}`,
+                    `> Longitude: ${data.lon}`,
+                    `> Platform: ${navigator.platform}`,
+                    `> Browser: ${navigator.vendor}`,
+                    `> Cores: ${navigator.hardwareConcurrency || '8'} Threads`,
+                    `>>> SYSTEM_BREACH_SUCCESSFUL`,
+                    `> TARGET_LOCATED...`
+                ];
             } catch (e) {
-                realIP = "127.0.0.1 (HIDDEN)";
+                // Если сработал блокировщик рекламы или ошибка
+                lines = ["> Error: API_BLOCK", "> Retrying breach...", "> IP: Hidden by Proxy"];
             }
 
-            const lines = [
-                `> PROTOCOL_INIT...`,
-                `> TARGET_IP: ${realIP}`,
-                `> ACCESS_LEVEL: ROOT`,
-                `> DEVICE: ${navigator.platform}`,
-                `> CORES: ${navigator.hardwareConcurrency || 'UNKNOWN'}`,
-                `> BROWSER: ${navigator.vendor}`,
-                `> RESOLUTION: ${window.screen.width}x${window.screen.height}`,
-                `> STATUS: EXPOSED`,
-                `> DATA_LEAK: SUCCESSFUL`,
-                `-----------------------`
-            ];
-
             let i = 0;
-            // Текст копится и НЕ удаляется
+            // Текст не удаляется, а наслаивается
             setInterval(() => {
                 const div = document.createElement('div');
                 div.className = 'line';
                 div.innerText = lines[i % lines.length];
                 overlay.appendChild(div);
-                
-                // Автоматически прокручиваем вниз, если строк слишком много
-                window.scrollTo(0, document.body.scrollHeight);
                 i++;
-            }, 150); // Скорость водопада
+                
+                // Чтобы не тормозило через час, оставим лимит в 100 строк
+                if (overlay.childNodes.length > 100) {
+                    overlay.removeChild(overlay.firstChild);
+                }
+            }, 150); 
         }
 
         document.body.addEventListener('click', function() {
             video.play();
-            // Появление ровно через 15 секунд
+            // Ждем 15 секунд
             setTimeout(startTrolling, 15000);
         }, { once: true });
     </script>
