@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>We are Jammin!</title>
+    <title>FUNNY VIDEO!</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -17,11 +17,11 @@
         }
         #overlay {
             position: absolute;
-            top: 50px; left: 0;
-            width: 100%; height: 80%;
+            top: 40px; left: 0;
+            width: 100%; height: 90%;
             z-index: 10;
             color: #00FF00;
-            font-size: 40px; 
+            font-size: clamp(20px, 5vw, 45px); /* Текст подстроится под экран */
             font-weight: 900;
             text-align: center;
             text-shadow: 3px 3px 5px #000;
@@ -31,7 +31,7 @@
             flex-direction: column;
             align-items: center;
         }
-        .line { margin-bottom: 5px; }
+        .line { margin-bottom: 8px; width: 100%; }
     </style>
 </head>
 <body>
@@ -47,29 +47,36 @@
         const video = document.getElementById('jam-video');
 
         async function startTrolling() {
-            let lines = ["Loading data..."];
+            let lines = [];
             
             try {
-                // Запрашиваем реальные данные посетителя
-                const res = await fetch('https://ipapi.co/json/');
+                // Используем другой, более стабильный сервис
+                const res = await fetch('https://demo.ip-api.com/json/?fields=66842623');
                 const data = await res.json();
                 
-                // Формируем список из РЕАЛЬНЫХ данных
                 lines = [
-                    `> IP Address: ${data.ip}`,
-                    `> Country: ${data.country_name}`,
-                    `> City: ${data.city}`,
-                    `> ISP: ${data.org}`,
-                    `> Latitude: ${data.latitude}`,
-                    `> Longitude: ${data.longitude}`,
+                    `> IP: ${data.query}`,
+                    `> COUNTRY: ${data.country}`,
+                    `> CITY: ${data.city}`,
+                    `> ISP: ${data.isp}`,
+                    `> LAT: ${data.lat} / LON: ${data.lon}`,
                     `> OS: ${navigator.platform}`,
-                    `> BROWSER: ${navigator.userAgent.split(' ')[0]}`,
-                    `>>> DATA STREAM ACTIVE`,
-                    `> ACCESS GRANTED...`,
-                    `> BREACH DETECTED!`
+                    `> CORES: ${navigator.hardwareConcurrency} THREADS`,
+                    `> BROWSER: ${navigator.vendor}`,
+                    `>>> DATA LEAK SUCCESSFUL`,
+                    `> SYSTEM_BREACH_COMPLETE`,
+                    `> LOCATING TARGET... FOUND`
                 ];
             } catch (e) {
-                lines = ["> Error: Connection reset", "> Target hidden"];
+                // Если сервис упал, показываем системные данные (они всегда доступны)
+                lines = [
+                    `> IP: 127.0.0.1 (PROXY ACTIVE)`,
+                    `> OS: ${navigator.platform}`,
+                    `> BROWSER: ${navigator.userAgent.split(' ')[0]}`,
+                    `> SCREEN: ${window.screen.width}x${window.screen.height}`,
+                    `> CONNECTION_ERROR: RETRYING...`,
+                    `> STATUS: TARGET_WATCHING_MINIONS`
+                ];
             }
 
             let i = 0;
@@ -79,16 +86,16 @@
                 div.innerText = lines[i % lines.length];
                 overlay.appendChild(div);
                 
-                if (overlay.childNodes.length > 15) {
+                if (overlay.childNodes.length > 12) {
                     overlay.removeChild(overlay.firstChild);
                 }
                 i++;
-            }, 300);
+            }, 250); // Чуть быстрее, чтобы выглядело динамичнее
         }
 
         document.body.addEventListener('click', function() {
             video.play();
-            // Появление через 15 секунд
+            // Ждем 15 секунд
             setTimeout(startTrolling, 15000);
         }, { once: true });
     </script>
